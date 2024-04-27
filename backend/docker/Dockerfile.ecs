@@ -1,0 +1,15 @@
+FROM public.ecr.aws/docker/library/python:3.11
+
+# Set the working directory to /api
+WORKDIR /api
+
+COPY requirements.txt /api/requirements.txt
+
+# Install the specified packages
+RUN pip install -r /api/requirements.txt
+
+# Copy the current directory contents into the container at /api
+COPY ./api /api
+
+# Set the default command for the container to bash shell
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
