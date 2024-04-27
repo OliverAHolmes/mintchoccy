@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "MintChoccy API"
+version = "0.1.0"
+description = "MintChoccy backend API."
+authors = ["Oliver Holmes <oliver.albert.holmes@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = "^0.27.1"
+mangum = "^0.17.0"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.3.0"
+pytest = "^8.1.0"
+pytest-cov = "^4.1.0"
+httpx = "0.26.0"
+aws-cdk-lib = "2.94.0"
+constructs = ">=10.0.0,<11.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
