@@ -10,6 +10,8 @@ from aws_cdk import (
     aws_ec2 as ec2,
     aws_ecr as ecr,
     aws_cognito as cognito,
+    aws_secretsmanager as secretsmanager,
+    SecretValue,
 )
 
 from constructs import Construct
@@ -20,6 +22,50 @@ import datetime
 class MintApiStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
+
+        cognito_user_pool = cognito.UserPool(
+            self,
+            "MintUserPool",
+            auto_verify=cognito.AutoVerifiedAttrs(email=True, phone=True),
+            standard_attributes=cognito.StandardAttributes(
+                email=cognito.StandardAttribute(mutable=True, required=True),
+                given_name=cognito.StandardAttribute(mutable=True, required=True),
+                family_name=cognito.StandardAttribute(mutable=True, required=True),
+            ),
+        )
+
+        client = cognito_user_pool.add_client(
+            "MintUserPoolClient",
+            auth_flows=cognito.AuthFlow(
+                user_password=True,
+                admin_user_password=True,
+            ),
+            prevent_user_existence_errors=True,
+        )
+
+        # Add user pool details to the secrets manager
+        cognito_user_pool_id = cognito_user_pool.user_pool_id
+        cognito_user_pool_arn = cognito_user_pool.user_pool_arn
+        client_id = client.user_pool_client_id
+
+        # Create the secret
+        secretsmanager.Secret(
+            self,
+            "CognitoUserPoolSecret",
+            secret_name="api/mint/cognitoUserPoolSecrets",
+            description="Cognito User Pool Secrets",
+            secret_object_value={
+                "MINT_USER_POOL_ID": SecretValue.unsafe_plain_text(
+                    cognito_user_pool_id
+                ),
+                "MINT_USER_POOL_ARN": SecretValue.unsafe_plain_text(
+                    cognito_user_pool_arn
+                ),
+                "MINT_USER_POOL_CLIENT_ID": SecretValue.unsafe_plain_text(
+                    client_id
+                ),
+            },
+        )
 
         # Create the Lambda function
         api_lambda = _lambda.Function(
