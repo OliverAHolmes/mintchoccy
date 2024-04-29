@@ -39,6 +39,7 @@ class MintApiStack(Stack):
             auth_flows=cognito.AuthFlow(
                 user_password=True,
                 admin_user_password=True,
+                user_srp=True,
             ),
             prevent_user_existence_errors=True,
         )
@@ -66,6 +67,7 @@ class MintApiStack(Stack):
                 ),
             },
         )
+
 
         # Create the Lambda function
         api_lambda = _lambda.Function(
