@@ -38,6 +38,15 @@ function App() {
           element={
             <>
               <PageTitle title="eCommerce Dashboard | TailAdmin - Tailwind CSS Admin Dashboard Template" />
+              <SignIn />
+            </>
+          }
+        />
+        <Route
+          path="/ecommerce"
+          element={
+            <>
+              <PageTitle title="ECommerce | TailAdmin - Tailwind CSS Admin Dashboard Template" />
               <ECommerce />
             </>
           }
