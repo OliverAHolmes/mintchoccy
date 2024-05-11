@@ -46,6 +46,10 @@ update_lambda_docker:
 update_lambda_image:
 	aws lambda update-function-code --function-name MintApiLambda --image-uri $$ECR_URL/mint-choccy-api:latest
 
+deploy_lambda: 
+	make update_lambda_docker
+	make update_lambda_image
+
 build_and_update_lambda:
 	make update_lambda_docker
 	make update_lambda_image

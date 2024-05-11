@@ -41,6 +41,7 @@ class MintApiStack(Stack):
                 admin_user_password=True,
                 user_srp=True,
             ),
+            generate_secret=True,
             prevent_user_existence_errors=True,
         )
 
@@ -48,6 +49,7 @@ class MintApiStack(Stack):
         cognito_user_pool_id = cognito_user_pool.user_pool_id
         cognito_user_pool_arn = cognito_user_pool.user_pool_arn
         client_id = client.user_pool_client_id
+        client_secret = client.user_pool_client_secret.unsafe_unwrap()
 
         # Create the secret
         secretsmanager.Secret(
@@ -63,6 +65,9 @@ class MintApiStack(Stack):
                     cognito_user_pool_arn
                 ),
                 "MINT_USER_POOL_CLIENT_ID": SecretValue.unsafe_plain_text(client_id),
+                "MINT_USER_POOL_CLIENT_SECRET": SecretValue.unsafe_plain_text(
+                    client_secret
+                ),
             },
         )
 
@@ -88,6 +93,7 @@ class MintApiStack(Stack):
             environment={
                 "COGNITO_USER_POOL_ID": cognito_user_pool_id,
                 "COGNITO_CLIENT_ID": client_id,
+                "COGNITO_CLIENT_SECRET": client_secret,
                 "REGION_NAME": "ap-southeast-2",
                 "CURRENT_ENV": "prod",
             },
@@ -115,7 +121,7 @@ class MintApiStack(Stack):
             cognito_user_pools=[
                 cognito.UserPool.from_user_pool_id(
                     self,
-                    "MintUserPool",
+                    "AuthMintUserPool",
                     user_pool_id=cognito_user_pool_id,
                 )
             ],

@@ -9,6 +9,7 @@ from fastapi.exceptions import RequestValidationError
 
 
 from routers import (
+    auth,
     health,
     users,
 )
@@ -72,4 +73,5 @@ async def root():
 
 
 app.include_router(health.router, tags=["health-check"])
-app.include_router(users.router, tags=["users"])
+app.include_router(auth.router, tags=["auth"])
+app.include_router(users.router, prefix="/users", tags=["users"])

@@ -4,13 +4,17 @@ import boto3
 from dotenv import load_dotenv
 from fastapi import HTTPException
 
+import hmac
+import hashlib
+import base64
+
 load_dotenv()
 
 CURRENT_ENV = os.environ.get("CURRENT_ENV")
 REGION_NAME = os.environ.get("REGION_NAME")
 COGNITO_USER_POOL_ID = os.environ.get("COGNITO_USER_POOL_ID")
 COGNITO_CLIENT_ID = os.environ.get("COGNITO_CLIENT_ID")
-
+COGNITO_CLIENT_SECRET = os.environ.get("COGNITO_CLIENT_SECRET")
 
 try:
     client = boto3.client("cognito-idp", region_name=REGION_NAME)
@@ -20,12 +24,24 @@ except Exception as e:
 
 
 def get_token(username: str, password: str):  # pragma: no cover
+    # Generate the secret hash
+    secret_hash = base64.b64encode(
+        hmac.new(
+            COGNITO_CLIENT_SECRET.encode("utf-8"),
+            username.encode("utf-8") + COGNITO_CLIENT_ID.encode("utf-8"),
+            hashlib.sha256,
+        ).digest()
+    ).decode("utf-8")
     # Input validation can be added here if needed
     try:
         response = client.initiate_auth(
             ClientId=COGNITO_CLIENT_ID,
             AuthFlow="USER_PASSWORD_AUTH",
-            AuthParameters={"USERNAME": username, "PASSWORD": password},
+            AuthParameters={
+                "USERNAME": username,
+                "PASSWORD": password,
+                "SECRET_HASH": secret_hash,
+            },
         )
     except client.exceptions.NotAuthorizedException:
         raise HTTPException(status_code=401, detail="Unauthorized")
